@@ -1,14 +1,40 @@
 const os = require('os');
+const fs = require('fs');
+const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 const { spawn } = require('child_process');
 const { RTMClient } = require('@slack/rtm-api');
+const interval = require('./interval');
 
 const token = process.env.SLACK_TOKEN;
 const name = process.env.SLACK_ROBOTNAME || os.hostname();
 const command = process.env.REBOOT_COMMAND || '/bin/echo';
 const PORT = process.env.PORT || 5901;
 const conversationId = process.env.SLACK_CHANNEL;
+
+const configPath = process.env.CONFIG_PATH || path.join(__dirname, 'config.json');
+
+function readConfig(configPath) {
+  try {
+    const text = fs.readFileSync(configPath);
+    return JSON.parse(text);
+  } catch(err) {
+    return {
+      onTime: '05:00',
+      offTime: '20:00',
+    }
+  }
+}
+
+const config = readConfig(configPath);
+console.log(config);
+const timer = interval(config.onTime, config.offTime);
+timer.start();
+
+function saveConfig(config) {
+  fs.writeFileSync(configPath, JSON.stringify(config));
+}
 
 const rtm = new RTMClient(token);
 rtm.start()
@@ -30,6 +56,30 @@ rtm.on('message', async (event) => {
     if (event.text.indexOf('元気') >= 0) {
       sendMessage(`元気です！`, event.channel);
     } else
+    if (event.text.indexOf('開始時間') >= 0) {
+      const t = event.text.match(/(\d\d):(\d\d)/);
+      if (t) {
+        const time = `${t[1]}:${t[2]}`
+        timer.onTime = time;
+        config.onTime = time;
+        saveConfig(config);
+        sendMessage(`開始時間を${time}に変更しました`, event.channel);
+      } else {
+        sendMessage(`何ですか？`, event.channel);
+      }
+    } else
+    if (event.text.indexOf('終了時間') >= 0) {
+      const t = event.text.match(/(\d\d):(\d\d)/);
+      if (t) {
+        const time = `${t[1]}:${t[2]}`
+        timer.offTime = time;
+        config.offTime = time;
+        saveConfig(config);
+        sendMessage(`終了時間を${time}に変更しました`, event.channel);
+      } else {
+        sendMessage(`何ですか？`, event.channel);
+      }
+    } else
     if (event.text.indexOf('再起動') >= 0) {
       sendMessage(`再起動します。`, event.channel);
       const playone = spawn(`${command}`);
@@ -37,7 +87,7 @@ rtm.on('message', async (event) => {
         process.stdout.write(data.toString());
       });
       playone.on('close', function() {
-        console.log('closed');
+        console.log(`${command} closed`);
       });
     } else
     if (event.text.indexOf('IPアドレス') >= 0) {
