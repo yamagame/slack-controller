@@ -1,7 +1,7 @@
 const { spawn } = require('child_process');
 
-const onCommand = process.env.REBOOT_ON_COMMAND || '/bin/echo';
-const offCommand = process.env.REBOOT_OFF_COMMAND || '/bin/echo';
+const onCommand = process.env.ROBOT_ON_COMMAND || '/bin/echo';
+const offCommand = process.env.ROBOT_OFF_COMMAND || '/bin/echo';
 
 function getTime() {
   const t = new Date();

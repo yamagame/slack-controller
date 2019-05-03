@@ -9,7 +9,7 @@ const interval = require('./interval');
 
 const token = process.env.SLACK_TOKEN;
 const name = process.env.SLACK_ROBOTNAME || os.hostname();
-const command = process.env.REBOOT_COMMAND || '/bin/echo';
+const command = process.env.ROBOT_REBOOT_COMMAND || '/bin/echo';
 const PORT = process.env.PORT || 5901;
 const conversationId = process.env.SLACK_CHANNEL;
 

@@ -12,9 +12,9 @@ cd `dirname $0`
 export SLACK_TOKEN=[Slack Token]
 export SLACK_CHANNEL=[Slack Channel ID]
 export SLACK_ROBOTNAME=[ロボット名]
-export REBOOT_COMMAND=[再起動コマンドへのパス]
-export REBOOT_ON_COMMAND=[開始コマンドへのパス]
-export REBOOT_OFF_COMMAND=[終了コマンドへのパス]
+export ROBOT_REBOOT_COMMAND=[再起動コマンドへのパス]
+export ROBOT_ON_COMMAND=[開始コマンドへのパス]
+export ROBOT_OFF_COMMAND=[終了コマンドへのパス]
 export CONFIG_PATH=[設定ファイルへのパス]
 export PORT=[ポート番号]
 node index.js
