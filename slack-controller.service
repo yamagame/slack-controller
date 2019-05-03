@@ -1,0 +1,12 @@
+[Unit]
+Description=Slack Controller Service
+After=servo-head.service
+
+[Service]
+ExecStart=/bin/bash -c './slack-controller.sh'
+WorkingDirectory=/home/pi/slack-controller
+Restart=always
+User=pi
+
+[Install]
+WantedBy=multi-user.target
