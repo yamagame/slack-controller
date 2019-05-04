@@ -28,6 +28,11 @@ function readConfig(configPath) {
   }
 }
 
+function getTime() {
+  const t = new Date();
+  return `${('00'+t.getHours()).slice(-2)}:${('00'+t.getMinutes()).slice(-2)}`;
+}
+
 const config = readConfig(configPath);
 console.log(config);
 const timer = interval(config.onTime, config.offTime);
@@ -92,6 +97,9 @@ rtm.on('message', async (event) => {
     } else
     if (event.text.indexOf('設定') >= 0) {
         sendMessage(`開始時間は${timer.onTime}、終了時間は${timer.offTime}です。`, event.channel);
+    } else
+    if (event.text.indexOf('何時') >= 0) {
+        sendMessage(`${getTime()}です。`, event.channel);
     } else
     if (event.text.indexOf('再起動') >= 0) {
       sendMessage(`再起動します。`, event.channel);
