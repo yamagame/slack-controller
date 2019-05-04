@@ -14,6 +14,7 @@ const PORT = process.env.PORT || 5901;
 const conversationId = process.env.SLACK_CHANNEL;
 
 const configPath = process.env.CONFIG_PATH || path.join(__dirname, 'config.json');
+let started = false;
 
 function readConfig(configPath) {
   try {
@@ -30,6 +31,12 @@ function readConfig(configPath) {
 const config = readConfig(configPath);
 console.log(config);
 const timer = interval(config.onTime, config.offTime);
+timer.event.on('start', () => {
+  sendMessage('開始しました。', conversationId);
+})
+timer.event.on('end', () => {
+  sendMessage('終了しました。', conversationId);
+})
 timer.start();
 
 function saveConfig(config) {
@@ -42,8 +49,11 @@ rtm.start()
 
 rtm.on('ready', async () => {
   console.log('Ready');
-  const res = await rtm.sendMessage(`${name}です。起動しました`, conversationId);
-  console.log('Message sent: ', res.ts);
+  if (!started) {
+    const res = await rtm.sendMessage(`${name}です。起動しました`, conversationId);
+    console.log('Message sent: ', res.ts);
+    started = true;
+  }
 });
 
 const sendMessage = async (message, channel) => {
@@ -79,6 +89,9 @@ rtm.on('message', async (event) => {
       } else {
         sendMessage(`何ですか？`, event.channel);
       }
+    } else
+    if (event.text.indexOf('設定') >= 0) {
+        sendMessage(`開始時間は${timer.onTime}、終了時間は${timer.offTime}です。`, event.channel);
     } else
     if (event.text.indexOf('再起動') >= 0) {
       sendMessage(`再起動します。`, event.channel);

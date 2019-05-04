@@ -1,4 +1,5 @@
 const { spawn } = require('child_process');
+const EventEmitter = require('events');
 
 const onCommand = process.env.ROBOT_ON_COMMAND || '/bin/echo';
 const offCommand = process.env.ROBOT_OFF_COMMAND || '/bin/echo';
@@ -20,22 +21,28 @@ function execCommand(command, callback) {
   });
 }
 
-function execInterval(onTime = '05:00', offTime = '21:00', callback) {
+function execInterval(onTime = '05:00', offTime = '21:00') {
   let prevTime = getTime()
   const t = {
+    event: new EventEmitter(),
     prevTime,
     onTime,
     offTime,
     idle: function() {
+      let self = this;
       let t = getTime();
       console.log(t);
       if (t != this.prevTime) {
         this.prevTime = t;
         if (t === this.onTime) {
-          execCommand(onCommand, callback);
+          execCommand(onCommand, function() {
+            self.event.emit('start');
+          });
         }
         if (t === this.offTime) {
-          execCommand(offCommand, callback);
+          execCommand(offCommand, function() {
+            self.event.emit('end');
+          });
         }
       }
     },
