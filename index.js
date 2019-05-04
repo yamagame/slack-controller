@@ -32,10 +32,10 @@ const config = readConfig(configPath);
 console.log(config);
 const timer = interval(config.onTime, config.offTime);
 timer.event.on('start', () => {
-  sendMessage('開始しました。', conversationId);
+  sendMessage(`${timer.onTime}になりましたので開始しました。`, conversationId);
 })
 timer.event.on('end', () => {
-  sendMessage('終了しました。', conversationId);
+  sendMessage(`${timer.offTime}になりましたので終了しました。`, conversationId);
 })
 timer.start();
 
