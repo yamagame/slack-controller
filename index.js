@@ -9,7 +9,6 @@ const interval = require('./interval');
 
 const token = process.env.SLACK_TOKEN;
 const name = process.env.SLACK_ROBOTNAME || os.hostname();
-const command = process.env.ROBOT_REBOOT_COMMAND || '/bin/echo';
 const PORT = process.env.PORT || 5901;
 const conversationId = process.env.SLACK_CHANNEL;
 
@@ -58,12 +57,16 @@ rtm.on('ready', async () => {
     const res = await rtm.sendMessage(`${name}です。起動しました`, conversationId);
     console.log('Message sent: ', res.ts);
     started = true;
+  } else {
+    const res = await rtm.sendMessage(`${name}です。接続しました`, conversationId);
+    console.log('Message sent: ', res.ts);
   }
 });
 
-const sendMessage = async (message, channel) => {
+const sendMessage = async (message, channel, callback) => {
   const res = await rtm.sendMessage(`${name}です。${message}`, channel);
   console.log('Message sent: ', res.ts);
+  if (callback) callback();
 }
 
 rtm.on('message', async (event) => {
@@ -98,17 +101,22 @@ rtm.on('message', async (event) => {
     if (event.text.indexOf('設定') >= 0) {
         sendMessage(`開始時間は${timer.onTime}、終了時間は${timer.offTime}です。`, event.channel);
     } else
+    if (event.text.indexOf('開始') >= 0) {
+      timer.exec('start', () => {
+        sendMessage(`開始しました。`, event.channel);
+      })
+    } else
+    if (event.text.indexOf('終了') >= 0) {
+      timer.exec('end', () => {
+        sendMessage(`終了しました。`, event.channel);
+      });
+    } else
     if (event.text.indexOf('何時') >= 0) {
         sendMessage(`${getTime()}です。`, event.channel);
     } else
     if (event.text.indexOf('再起動') >= 0) {
-      sendMessage(`再起動します。`, event.channel);
-      const playone = spawn(`${command}`);
-      playone.stdout.on('data', function(data) {
-        process.stdout.write(data.toString());
-      });
-      playone.on('close', function() {
-        console.log(`${command} closed`);
+      sendMessage(`再起動します。`, event.channel, () => {
+        timer.exec('reboot');
       });
     } else
     if (event.text.indexOf('IPアドレス') >= 0) {

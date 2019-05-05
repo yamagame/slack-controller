@@ -3,6 +3,7 @@ const EventEmitter = require('events');
 
 const onCommand = process.env.ROBOT_ON_COMMAND || '/bin/echo';
 const offCommand = process.env.ROBOT_OFF_COMMAND || '/bin/echo';
+const rebootCommand = process.env.ROBOT_REBOOT_COMMAND || '/bin/echo';
 
 function getTime() {
   const t = new Date();
@@ -28,6 +29,36 @@ function execInterval(onTime = '05:00', offTime = '21:00') {
     prevTime,
     onTime,
     offTime,
+    exec: function(command, callback) {
+      let self = this;
+      if (command === 'start') {
+        execCommand(onCommand, function() {
+          if (callback) {
+            callback();
+          } else {
+            self.event.emit(command);
+          }
+        });
+      }
+      if (command === 'end') {
+        execCommand(offCommand, function() {
+          if (callback) {
+            callback();
+          } else {
+            self.event.emit(command);
+          }
+        });
+      }
+      if (command === 'reboot') {
+        execCommand(rebootCommand, function() {
+          if (callback) {
+            callback();
+          } else {
+            self.event.emit(command);
+          }
+        });
+      }
+    },
     idle: function() {
       let self = this;
       let t = getTime();
@@ -35,14 +66,10 @@ function execInterval(onTime = '05:00', offTime = '21:00') {
       if (t != this.prevTime) {
         this.prevTime = t;
         if (t === this.onTime) {
-          execCommand(onCommand, function() {
-            self.event.emit('start');
-          });
+          this.exec('start');
         }
         if (t === this.offTime) {
-          execCommand(offCommand, function() {
-            self.event.emit('end');
-          });
+          this.exec('end');
         }
       }
     },
