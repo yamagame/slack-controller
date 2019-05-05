@@ -15,6 +15,7 @@ export SLACK_ROBOTNAME=[ロボット名]
 export ROBOT_REBOOT_COMMAND=[再起動コマンドへのパス]
 export ROBOT_ON_COMMAND=[開始コマンドへのパス]
 export ROBOT_OFF_COMMAND=[終了コマンドへのパス]
+export ROBOT_STATE_COMMAND=[状態確認コマンドへのパス]
 export CONFIG_PATH=[設定ファイルへのパス]
 export PORT=[ポート番号]
 node index.js
@@ -58,4 +59,21 @@ node index.js
 
 ```
 [ロボット名]くん、設定教えて
+```
+
+```
+[ロボット名]くん、状態教えて
+```
+
+## プロセスの稼働確認スクリプトサンプル
+
+```bash
+#!/bin/bash
+PROCESS_NAME='node servo-head.js'
+count=`ps -ef | grep "$PROCESS_NAME" | grep -v grep | wc -l`
+if [ $count = 0 ]; then
+  echo 停止中
+else
+  echo 稼働中
+fi
 ```

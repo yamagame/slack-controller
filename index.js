@@ -101,6 +101,11 @@ rtm.on('message', async (event) => {
     if (event.text.indexOf('設定') >= 0) {
         sendMessage(`開始時間は${timer.onTime}、終了時間は${timer.offTime}です。`, event.channel);
     } else
+    if (event.text.indexOf('状態') >= 0) {
+        timer.exec('state', (result) => {
+          sendMessage(`${result.trim()}です。`, event.channel);
+        });
+    } else
     if (event.text.indexOf('開始') >= 0) {
       timer.exec('start', () => {
         sendMessage(`開始しました。`, event.channel);

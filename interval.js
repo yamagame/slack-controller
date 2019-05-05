@@ -4,6 +4,7 @@ const EventEmitter = require('events');
 const onCommand = process.env.ROBOT_ON_COMMAND || '/bin/echo';
 const offCommand = process.env.ROBOT_OFF_COMMAND || '/bin/echo';
 const rebootCommand = process.env.ROBOT_REBOOT_COMMAND || '/bin/echo';
+const stateCommand = process.env.ROBOT_STATE_COMMAND || '/bin/echo';
 
 function getTime() {
   const t = new Date();
@@ -12,13 +13,15 @@ function getTime() {
 
 function execCommand(command, callback) {
   console.log(`${command}`);
+  let result = '';
   const playone = spawn(`${command}`);
   playone.stdout.on('data', function(data) {
     process.stdout.write(data.toString());
+    result += data.toString();
   });
   playone.on('close', function() {
     console.log(`${command} closed`);
-    if (callback) callback();
+    if (callback) callback(result);
   });
 }
 
@@ -32,29 +35,38 @@ function execInterval(onTime = '05:00', offTime = '21:00') {
     exec: function(command, callback) {
       let self = this;
       if (command === 'start') {
-        execCommand(onCommand, function() {
+        execCommand(onCommand, function(result) {
           if (callback) {
-            callback();
+            callback(result);
           } else {
-            self.event.emit(command);
+            self.event.emit(command, result);
           }
         });
       }
       if (command === 'end') {
-        execCommand(offCommand, function() {
+        execCommand(offCommand, function(result) {
           if (callback) {
-            callback();
+            callback(result);
           } else {
-            self.event.emit(command);
+            self.event.emit(command, result);
           }
         });
       }
       if (command === 'reboot') {
-        execCommand(rebootCommand, function() {
+        execCommand(rebootCommand, function(result) {
           if (callback) {
-            callback();
+            callback(result);
           } else {
-            self.event.emit(command);
+            self.event.emit(command, result);
+          }
+        });
+      }
+      if (command === 'state') {
+        execCommand(stateCommand, function(result) {
+          if (callback) {
+            callback(result);
+          } else {
+            self.event.emit(command, result);
           }
         });
       }
