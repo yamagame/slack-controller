@@ -14,6 +14,7 @@ function getTime() {
 function execCommand(command, callback) {
   console.log(`${command}`);
   let result = '';
+  let done = false;
   const playone = spawn(`${command}`);
   playone.stdout.on('data', function(data) {
     process.stdout.write(data.toString());
@@ -21,7 +22,17 @@ function execCommand(command, callback) {
   });
   playone.on('close', function() {
     console.log(`${command} closed`);
-    if (callback) callback(result);
+    if (!done) {
+      if (callback) callback(result);
+      done = true;
+    }
+  });
+  playone.on('end', function() {
+    console.log(`${command} ended`);
+    if (!done) {
+      if (callback) callback(result);
+      done = true;
+    }
   });
 }
 

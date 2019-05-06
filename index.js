@@ -155,5 +155,9 @@ app.post('/message', (req, res) => {
   res.send('OK\n');
 })
 
+app.post('/check', (req, res) => {
+  res.send('OK\n');
+})
+
 const server = require('http').Server(app);
 server.listen(PORT, () => console.log(`slack-controller listening on port ${PORT}!`))
