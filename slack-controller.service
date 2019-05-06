@@ -1,6 +1,5 @@
 [Unit]
 Description=Slack Controller Service
-After=servo-head.service
 
 [Service]
 ExecStart=/bin/bash -c './slack-controller.sh'
