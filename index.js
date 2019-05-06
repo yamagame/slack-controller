@@ -125,8 +125,8 @@ rtm.on('message', async (event) => {
       });
     } else
     if (event.text.indexOf('更新') >= 0) {
-      timer.exec('update', () => {
-        sendMessage(`更新しました。`, event.channel);
+      timer.exec('update', (result) => {
+        sendMessage(`${result}`, event.channel);
       })
     } else
     if (event.text.indexOf('IPアドレス') >= 0) {
