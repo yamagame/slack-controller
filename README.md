@@ -16,6 +16,7 @@ export ROBOT_REBOOT_COMMAND=[再起動コマンドへのパス]
 export ROBOT_ON_COMMAND=[開始コマンドへのパス]
 export ROBOT_OFF_COMMAND=[終了コマンドへのパス]
 export ROBOT_STATE_COMMAND=[状態確認コマンドへのパス]
+export ROBOT_UPDATE_COMMAND=[更新コマンドへのパス]
 export CONFIG_PATH=[設定ファイルへのパス]
 export PORT=[ポート番号]
 node index.js

@@ -124,6 +124,11 @@ rtm.on('message', async (event) => {
         timer.exec('reboot');
       });
     } else
+    if (event.text.indexOf('更新') >= 0) {
+      timer.exec('update', () => {
+        sendMessage(`更新しました。`, event.channel);
+      })
+    } else
     if (event.text.indexOf('IPアドレス') >= 0) {
       function getIPAddress() {
         var interfaces = os.networkInterfaces();

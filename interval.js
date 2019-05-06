@@ -5,6 +5,7 @@ const onCommand = process.env.ROBOT_ON_COMMAND || '/bin/echo';
 const offCommand = process.env.ROBOT_OFF_COMMAND || '/bin/echo';
 const rebootCommand = process.env.ROBOT_REBOOT_COMMAND || '/bin/echo';
 const stateCommand = process.env.ROBOT_STATE_COMMAND || '/bin/echo';
+const updateCommand = process.env.ROBOT_UPDATE_COMMAND || '/bin/echo';
 
 function getTime() {
   const t = new Date();
@@ -67,6 +68,15 @@ function execInterval(onTime = '05:00', offTime = '21:00') {
       }
       if (command === 'state') {
         execCommand(stateCommand, function(result) {
+          if (callback) {
+            callback(result);
+          } else {
+            self.event.emit(command, result);
+          }
+        });
+      }
+      if (command === 'update') {
+        execCommand(updateCommand, function(result) {
           if (callback) {
             callback(result);
           } else {
