@@ -20,15 +20,8 @@ function execCommand(command, callback) {
     process.stdout.write(data.toString());
     result += data.toString();
   });
-  playone.on('close', function() {
-    console.log(`${command} closed`);
-    if (!done) {
-      if (callback) callback(result);
-      done = true;
-    }
-  });
-  playone.on('end', function() {
-    console.log(`${command} ended`);
+  playone.on('exit', function() {
+    console.log(`${command} exit`);
     if (!done) {
       if (callback) callback(result);
       done = true;
