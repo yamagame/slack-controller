@@ -155,8 +155,14 @@ app.post('/message', (req, res) => {
   res.send('OK\n');
 })
 
+app.post('/healthcheck', (req, res) => {
+  res.send('OK');
+})
+
 app.post('/check', (req, res) => {
-  res.send('OK\n');
+  timer.exec('state', (result) => {
+    res.send(`${result.trim()}`);
+  });
 })
 
 const server = require('http').Server(app);
