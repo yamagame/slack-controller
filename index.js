@@ -14,6 +14,7 @@ const conversationId = process.env.SLACK_CHANNEL;
 
 const configPath = process.env.CONFIG_PATH || path.join(__dirname, 'config.json');
 let started = false;
+let working = true;
 
 function readConfig(configPath) {
   try {
@@ -36,9 +37,11 @@ const config = readConfig(configPath);
 console.log(config);
 const timer = interval(config.onTime, config.offTime);
 timer.event.on('start', () => {
+  working = true;
   sendMessage(`${timer.onTime}になりましたので開始しました。`, conversationId);
 })
 timer.event.on('end', () => {
+  working = false;
   sendMessage(`${timer.offTime}になりましたので終了しました。`, conversationId);
 })
 timer.start();
@@ -107,11 +110,13 @@ rtm.on('message', async (event) => {
         });
     } else
     if (event.text.indexOf('開始') >= 0) {
+      working = start;
       timer.exec('start', () => {
         sendMessage(`開始しました。`, event.channel);
       })
     } else
     if (event.text.indexOf('終了') >= 0) {
+      working = false;
       timer.exec('end', () => {
         sendMessage(`終了しました。`, event.channel);
       });
@@ -165,9 +170,13 @@ app.post('/healthcheck', (req, res) => {
 })
 
 app.post('/check', (req, res) => {
-  timer.exec('state', (result) => {
-    res.send(`${result.trim()}`);
-  });
+  if (working) {
+    timer.exec('state', (result) => {
+      res.send(`${result.trim()}`);
+    });
+  } else {
+      res.send(`停止中`);
+  }
 })
 
 const server = require('http').Server(app);
