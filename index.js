@@ -110,7 +110,7 @@ rtm.on('message', async (event) => {
         });
     } else
     if (event.text.indexOf('開始') >= 0) {
-      working = start;
+      working = true;
       timer.exec('start', () => {
         sendMessage(`開始しました。`, event.channel);
       })
