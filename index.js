@@ -191,7 +191,7 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json({ type: 'application/json' }))
 
 app.post('/message', (req, res) => {
-  sendMessage(req.body.text, conversationId);
+  RTM.sendMessage(req.body.text, conversationId);
   res.send('OK\n');
 })
 
