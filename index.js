@@ -54,11 +54,11 @@ function saveConfig(config) {
 }
 
 function RestartRTM() {
-  RTM = null;
+  // RTM = null;
   if (restartTimeout) clearTimeout(restartTimeout);
   restartTimeout = setTimeout(() => {
     restartTimeout = null;
-    RTM = StartRTM();
+    // RTM = StartRTM();
   }, 60000)
 }
 
