@@ -83,11 +83,15 @@ function StartRTM() {
   rtm.on('disconnected', (err) => {
     console.log(err);
     console.log('disconnected');
+  })
+
+  rtm.on('close', (code, message) => {
+    console.log('close: '+code+' : '+message);
     RTM = null;
     setTimeout(() => {
       RTM = StartRTM();
     }, 60000)
-  })
+  });
 
   const sendMessage = async (message, channel, callback) => {
     const res = await rtm.sendMessage(`${name}です。${message}`, channel);
