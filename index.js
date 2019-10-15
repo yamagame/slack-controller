@@ -16,6 +16,8 @@ const configPath = process.env.CONFIG_PATH || path.join(__dirname, 'config.json'
 let started = false;
 let working = true;
 let RTM = null;
+let restartTimeout = null;
+let reconnectTimeout = null;
 
 function readConfig(configPath) {
   try {
@@ -51,6 +53,15 @@ function saveConfig(config) {
   fs.writeFileSync(configPath, JSON.stringify(config));
 }
 
+function RestartRTM() {
+  RTM = null;
+  if (restartTimeout) clearTimeout(restartTimeout);
+  restartTimeout = setTimeout(() => {
+    restartTimeout = null;
+    RTM = StartRTM();
+  }, 60000)
+}
+
 function StartRTM() {
   const rtm = new RTMClient(token);
   rtm.start()
@@ -70,10 +81,19 @@ function StartRTM() {
 
   rtm.on('connected', () => {
     console.log('connected');
+    if (reconnectTimeout) clearTimeout(reconnectTimeout);
+    reconnectTimeout = null;
+    if (restartTimeout) clearTimeout(restartTimeout);
+    restartTimeout = null;
   })
 
   rtm.on('reconnecting', () => {
     console.log('reconnecting');
+    if (reconnectTimeout) clearTimeout(reconnectTimeout);
+    reconnectTimeout = setTimeout(() => {
+      reconnectTimeout = null;
+      RestartRTM();
+    }, 60000);
   })
 
   rtm.on('disconnecting', () => {
@@ -83,14 +103,12 @@ function StartRTM() {
   rtm.on('disconnected', (err) => {
     console.log(err);
     console.log('disconnected');
+    RestartRTM();
   })
 
   rtm.on('close', (code, message) => {
     console.log('close: '+code+' : '+message);
-    RTM = null;
-    setTimeout(() => {
-      RTM = StartRTM();
-    }, 60000)
+    RestartRTM();
   });
 
   const sendMessage = async (message, channel, callback) => {
