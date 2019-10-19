@@ -16,8 +16,6 @@ const configPath = process.env.CONFIG_PATH || path.join(__dirname, 'config.json'
 let started = false;
 let working = true;
 let RTM = null;
-let restartTimeout = null;
-let reconnectTimeout = null;
 
 function readConfig(configPath) {
   try {
@@ -53,17 +51,14 @@ function saveConfig(config) {
   fs.writeFileSync(configPath, JSON.stringify(config));
 }
 
-function RestartRTM() {
-  // RTM = null;
-  if (restartTimeout) clearTimeout(restartTimeout);
-  restartTimeout = setTimeout(() => {
-    restartTimeout = null;
-    // RTM = StartRTM();
-  }, 60000)
-}
-
 function StartRTM() {
-  const rtm = new RTMClient(token);
+  const rtm = new RTMClient(token, { autoReconnect: true, 
+    retryConfig: {
+      retries: 24*60*60,
+      minTimeout: 1000,
+      maxTimeout: 5000,
+    } 
+  });
   rtm.start()
     .catch(console.error);
 
@@ -80,20 +75,15 @@ function StartRTM() {
   });
 
   rtm.on('connected', () => {
-    console.log('connected');
-    if (reconnectTimeout) clearTimeout(reconnectTimeout);
-    reconnectTimeout = null;
-    if (restartTimeout) clearTimeout(restartTimeout);
-    restartTimeout = null;
+    console.log(`connected activeUserId:${rtm.activeUserId}`);
+  })
+
+  rtm.on('connecting', () => {
+    console.log('connecting');
   })
 
   rtm.on('reconnecting', () => {
     console.log('reconnecting');
-    if (reconnectTimeout) clearTimeout(reconnectTimeout);
-    reconnectTimeout = setTimeout(() => {
-      reconnectTimeout = null;
-      RestartRTM();
-    }, 60000);
   })
 
   rtm.on('disconnecting', () => {
@@ -103,22 +93,28 @@ function StartRTM() {
   rtm.on('disconnected', (err) => {
     console.log(err);
     console.log('disconnected');
-    RestartRTM();
   })
 
   rtm.on('close', (code, message) => {
     console.log('close: '+code+' : '+message);
-    RestartRTM();
   });
 
   const sendMessage = async (message, channel, callback) => {
-    const res = await rtm.sendMessage(`${name}です。${message}`, channel);
-    console.log('Message sent: ', res.ts);
+    try {
+      const res = await rtm.sendMessage(`${name}です。${message}`, channel);
+      console.log('Message sent: ', res.ts);
+    } catch (err) {
+      if (err.code === ErrorCode.SendMessagePlatformError) {
+        console.log(err.data);
+      } else {
+        console.log('sendMessage Error');
+      }
+    }
     if (callback) callback();
   }
 
   rtm.on('message', async (event) => {
-    if (event.text.trim().indexOf(name) == 0) {
+    if (event.text.trim().indexOf(name) == 0 && event.user !== rtm.activeUserId) {
       if (event.text.indexOf('元気') >= 0) {
         sendMessage(`元気です！`, event.channel);
       } else
