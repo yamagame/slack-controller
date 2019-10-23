@@ -56,7 +56,7 @@ function StartRTM() {
     retryConfig: {
       retries: 24*60*60,
       minTimeout: 1000,
-      maxTimeout: 5000,
+      maxTimeout: 30000,
     } 
   });
   rtm.start()
