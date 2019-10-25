@@ -210,6 +210,7 @@ app.use(bodyParser.json({ type: 'application/json' }))
 
 app.post('/message', (req, res) => {
   RTM.sendMessage(req.body.text, conversationId);
+  console.log(req.body.text);
   res.send('OK\n');
 })
 
